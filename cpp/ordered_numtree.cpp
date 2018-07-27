@@ -18,9 +18,9 @@ using namespace std;
 template <class T, class Pointer, class Reference>
 struct FullPathTreeIterator : public iterator<bidirectional_iterator_tag,T,ptrdiff_t,Pointer,Reference>
 {
-	
 public:
 	FullPathTreeIterator(Pointer p){_p = p;};
+	FullPathTreeIterator(const FullPathTreeIterator &i){_p = i._p;};
 
 	FullPathTreeIterator& operator++()
 	{
@@ -65,7 +65,7 @@ public:
 	{
 		return _p != x._p;
 	}
-private:
+protected:
 	Pointer _p;
 	void next()
 	{
@@ -92,17 +92,23 @@ private:
 			if (_p->prev != NULL)
 			{//有左兄弟
 				_p = _p->prev;
-				while (true)
-				{//找左兄弟子树最右边的叶子
-					if (_p->next!=NULL)
-					{
-						_p = _p->next;
-					}else if (_p->child!=NULL)
-					{
-						_p = _p->child;
-					}else
-					{
-						break;
+
+				if(_p->child != NULL)
+				{// 左兄弟有子树,前一个为左兄弟的最右边的叶子
+					_p = _p->child;
+
+					while (true)
+					{//找左兄弟子树最右边的叶子
+						if (_p->next!=NULL)
+						{
+							_p = _p->next;
+						}else if (_p->child!=NULL)
+						{
+							_p = _p->child;
+						}else
+						{
+							break;
+						}
 					}
 				}
 				return ;
@@ -110,6 +116,36 @@ private:
 			//没有左兄弟,往上找父结点的右兄弟
 			_p = _p->parent;
 		}		
+	}
+};
+template <class T, class Pointer, class Reference>
+struct FullPathTreeReverseIterator : public FullPathTreeIterator<T,Pointer,Reference>
+{
+	typedef FullPathTreeIterator<T,Pointer,Reference> _Base;
+public:
+	FullPathTreeReverseIterator(Pointer p):_Base::FullPathTreeIterator(p){};
+	FullPathTreeReverseIterator(const FullPathTreeReverseIterator &i):_Base::FullPathTreeIterator(i){};
+	FullPathTreeReverseIterator& operator++()
+	{
+		_Base::prev();
+		return *this;
+	}
+	FullPathTreeReverseIterator operator++(int)
+	{
+		FullPathTreeReverseIterator x = *this;
+		_Base::prev();
+		return x;
+	}
+	FullPathTreeReverseIterator& operator--()
+	{
+		_Base::next();
+		return *this;
+	}
+	FullPathTreeReverseIterator operator--(int)
+	{
+		FullPathTreeReverseIterator x = *this;
+		_Base::next();
+		return x;
 	}
 };
 
@@ -139,6 +175,8 @@ struct NumTree
 {
 	typedef FullPathTreeIterator<_pNode,_pNode*,_pNode&> iterator;
 	typedef FullPathTreeIterator<_pNode,const _pNode*,const _pNode&> const_iterator;
+	typedef FullPathTreeReverseIterator<_pNode,_pNode*,_pNode&> reverse_iterator;
+	typedef FullPathTreeReverseIterator<_pNode,const _pNode*,const _pNode&> const_reverse_iterator;
 
 	NumTree()
 	{
@@ -199,6 +237,31 @@ struct NumTree
 		return iterator(NULL);
 	}
 
+	const reverse_iterator rbegin() const
+	{
+		_pNode* p = root;
+		while (true)
+		{
+			if (p!=NULL&&p->next != NULL)
+			{
+				p = p->next;
+			}else if (p!=NULL&&p->child != NULL)
+			{
+				p = p->child;
+			}else
+			{
+				break;
+			}
+		}
+
+		return reverse_iterator(p);
+	}
+
+	const reverse_iterator rend() const
+	{
+		return reverse_iterator(NULL);
+	}
+
 	void DepthFirstTravel(_pNode* root, CallBack callbackfunc)
 	{		
 		for (iterator iter = begin(); iter != end(); iter++)
@@ -215,11 +278,19 @@ struct NumTree
 		}
 	}
 
+	void PrintReverse() const
+	{
+		for (reverse_iterator iter = rbegin(); iter != rend(); iter++)
+		{
+			std::cout << iter->Value() << std::endl;			
+		}
+	}
+
 	void InsetNode(int value)
 	{
 		_pNode* FindLeftNode = NULL;
 		_pNode* FindRightNode = NULL;
-		
+
 		for (iterator iter = begin(); iter != end(); iter++)
 		{
 			int val = iter->Value();
@@ -370,7 +441,7 @@ int main(int argc, char* argv[])
 #if defined _WIN32 || defined _WIN64
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	
+
 	NumTree tree;
 
 	int a[] = {111,22,11,1,3,2,666,7,123,112,124,156};
@@ -381,6 +452,8 @@ int main(int argc, char* argv[])
 	}
 
 	tree.Print();
+	cout << endl;
+	tree.PrintReverse();
 
 	getchar();
 	return 0;
