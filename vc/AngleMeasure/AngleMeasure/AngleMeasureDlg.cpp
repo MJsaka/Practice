@@ -101,14 +101,27 @@ BEGIN_MESSAGE_MAP(CAngleMeasureDlg, CDialogEx)
 	ON_WM_DRAWITEM()
 END_MESSAGE_MAP()
 
-int DrawAxisOnBitmap(Bitmap* bmp, int cx, int cy)
+void GetLineSegPointDisFrom1(double x1, double y1, double x2, double y2, double pos, double &x, double &y)
 {
-	Graphics gr1(bmp);
+	double l = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+	if (l == 0)
+		return;
+
+	double r = pos / l;
+
+	x = x1 * (1 - r) + x2 * r;
+	y = y1 * (1 - r) + y2 * r;
+}
+
+int DrawAxisOnBitmap(Gdiplus::Bitmap* bmp, int cx, int cy)
+{
+	Gdiplus::Graphics gr1(bmp);
 
 	int width = bmp->GetWidth();
 	int height = bmp->GetHeight();
 
-	Pen pen1(Color::Red,1);
+	Gdiplus::Pen pen1(Gdiplus::Color::Red, 1);
 	gr1.DrawLine(&pen1,0,cy,width,cy);
 	gr1.DrawLine(&pen1,cx,0,cx,height);
 
@@ -137,16 +150,47 @@ int DrawAxisOnBitmap(Bitmap* bmp, int cx, int cy)
 
 int DrawCircleOnBitmap(Bitmap* bmp, int x, int y, int r)
 {
-	Graphics gr1(bmp);
+	Gdiplus::Graphics gr1(bmp);
 
 	int width = bmp->GetWidth();
 	int height = bmp->GetHeight();
 
-	Pen pen1(Color::Red,1);
+	Gdiplus::Pen pen1(Gdiplus::Color::Red, 1);
 	gr1.DrawArc(&pen1,x-r,y-r,r*2,r*2,0,360);
 	
 	return 0;
 }
+
+int DrawLineOnBitmap(Bitmap* bmp, int x1, int y1, int x2, int y2)
+{
+	Gdiplus::Graphics gr1(bmp);
+
+	Gdiplus::Pen pen1(Gdiplus::Color::Red, 1);
+	gr1.DrawLine(&pen1, x1, y1, x2, y2);
+
+	return 0;
+}
+
+int DrawTextOnBitmap(Bitmap* bmp, CString s1, int x, int y)
+{
+	CStringW sw1 = s1;
+	Gdiplus::Graphics gr1(bmp);
+
+	Gdiplus::FontFamily ff1(L"新宋体");
+	Gdiplus::Font f1(&ff1, 16, Gdiplus::FontStyleRegular);
+
+	Gdiplus::StringFormat sf1;
+	sf1.SetAlignment(Gdiplus::StringAlignmentCenter);
+	sf1.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+	Gdiplus::PointF p1(x, y);
+
+	Gdiplus::SolidBrush sb1(Gdiplus::Color::Blue);
+	gr1.DrawString(sw1, sw1.GetLength(), &f1, p1, &sf1, &sb1);
+
+	return 0;
+}
+
 // CAngleMeasureDlg 消息处理程序
 void CAngleMeasureDlg::AutoResize()
 {
@@ -258,7 +302,7 @@ void CAngleMeasureDlg::DrawDisplay()
 	MemDC.SelectObject(&MemBitmap);
 	MemDC.FillSolidRect(0, 0, dis_width, dis_height, RGB(255,255,255));
 
-	Graphics graphics(MemDC.m_hDC);
+	Gdiplus::Graphics graphics(MemDC.m_hDC);
 	graphics.DrawImage(m_pBitmapDisplay,0,0,dis_width,dis_height);
 
 	cdc->BitBlt(0, 0, dis_width, dis_height, &MemDC, 0, 0, SRCCOPY);
@@ -286,12 +330,12 @@ void CAngleMeasureDlg::UpdateDisplay()
 		m_pBitmapDisplay=::new Bitmap(dis_width,dis_height);
 	}
 
-	Graphics bmpGraphics(m_pBitmapDisplay);
-	bmpGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
+	Gdiplus::Graphics bmpGraphics(m_pBitmapDisplay);
+	bmpGraphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
 	if (m_pBitmap == NULL)
 	{
-		bmpGraphics.Clear(Color::White);
+		bmpGraphics.Clear(Gdiplus::Color::White);
 	}else
 	{
 		bmpGraphics.DrawImage(m_pBitmap,0,0,dis_width,dis_height);
@@ -320,6 +364,21 @@ void CAngleMeasureDlg::UpdateDisplay()
 			double y = _tstof(s1.Mid(j)) * dis_height / m_iPicHeight;
 
 			radius_avg += sqrt(x*x+y*y);
+
+
+			s1 = m_listResult.GetItemText(i, col_abspos);
+			s1.TrimLeft(_T(" "));
+			j = s1.Find(_T(" "));
+			x = _tstof(s1.Left(j)) * dis_width / m_iPicWidth;
+			y = _tstof(s1.Mid(j)) * dis_height / m_iPicHeight;
+
+			double x1, y1, x2, y2;
+			GetLineSegPointDisFrom1(x, y, xc, yc, 10, x1, y1);
+			GetLineSegPointDisFrom1(x, y, xc, yc, -10, x2, y2);
+			DrawLineOnBitmap(m_pBitmapDisplay, x1, y1, x2, y2);
+
+			s1.Format(_T("%d"), i - row_point_start + 1);
+			DrawTextOnBitmap(m_pBitmapDisplay, s1, x, y);
 		}
 
 		radius_avg /= n - row_point_start;
