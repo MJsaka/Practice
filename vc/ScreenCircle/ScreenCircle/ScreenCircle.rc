@@ -70,7 +70,6 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\ScreenCircle.ico"
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -106,6 +105,23 @@ BEGIN
     BLOCK "VarFileInfo"
     BEGIN
         VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_TRAY MENU
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "ÔÝÍ£",                          ID_TRAY_PAUSE
+        MENUITEM "µ¥²½",                          ID_TRAY_STEP
+        MENUITEM SEPARATOR
+        MENUITEM "ÍË³ö",                          ID_TRAY_EXIT
     END
 END
 

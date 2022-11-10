@@ -44,7 +44,9 @@ BOOL CScreenCircleApp::InitInstance()
 {
 	CWinApp::InitInstance();
 
+#if FLOAT_WINDOW_INSTANCE
 	EnableTaskbarInteraction(FALSE);
+#endif
 
 	//启动Gdiplus
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
@@ -61,21 +63,33 @@ BOOL CScreenCircleApp::InitInstance()
 	m_pMainWnd = pFrame;
 	
 	CREATESTRUCT cs = {0};
+
+#if FLOAT_WINDOW_INSTANCE
 	cs.cx = GetSystemMetrics(SM_CXSCREEN);
 	cs.cy = GetSystemMetrics(SM_CYSCREEN);
+
 	//设置窗口样式  分层混合  置顶  不激活  透明
 	cs.dwExStyle |= WS_EX_LAYERED;
 	cs.dwExStyle |= WS_EX_TOPMOST;
 	cs.dwExStyle |= WS_EX_NOACTIVATE;
 	cs.dwExStyle |= WS_EX_TRANSPARENT;
-	cs.lpszClass = AfxRegisterWndClass(0);
-
+	cs.lpszClass = AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW);
 	pFrame->CreateEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, NULL, NULL);
+
 	//去除窗口边框
 	::SetWindowLong(pFrame->m_hWnd, GWL_STYLE, ::GetWindowLong(pFrame->m_hWnd, GWL_STYLE) & ~WS_BORDER);
 	::SetWindowLong(pFrame->m_hWnd, GWL_STYLE, ::GetWindowLong(pFrame->m_hWnd, GWL_STYLE) & ~WS_CAPTION);
 	::SetWindowLong(pFrame->m_hWnd, GWL_STYLE, ::GetWindowLong(pFrame->m_hWnd, GWL_STYLE) & ~WS_EX_WINDOWEDGE);
 	::SetWindowLong(pFrame->m_hWnd, GWL_STYLE, ::GetWindowLong(pFrame->m_hWnd, GWL_STYLE) & ~WS_EX_DLGMODALFRAME);
+#else
+	cs.cx = 800;
+	cs.cy = 600;
+	cs.x = (GetSystemMetrics(SM_CXSCREEN) - cs.cx) / 2;
+	cs.y = (GetSystemMetrics(SM_CYSCREEN) - cs.cy) / 2;
+	cs.dwExStyle = WS_EX_OVERLAPPEDWINDOW;
+	cs.lpszClass = AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW);
+	pFrame->CreateEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, GetDesktopWindow(), NULL);
+#endif
 
 	// 唯一的一个窗口已初始化，因此显示它并对其进行更新
 	pFrame->ShowWindow(SW_SHOW);

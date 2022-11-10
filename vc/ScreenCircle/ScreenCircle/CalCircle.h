@@ -1,7 +1,7 @@
 #pragma once
 
 #define MAX_COUNT 16				//最大数量
-#define CIRCLE_COUNT MAX_COUNT		//实际数量
+#define CIRCLE_COUNT 16				//实际数量
 
 extern int border_width;			//窗口宽度
 extern int border_height;			//窗口高度

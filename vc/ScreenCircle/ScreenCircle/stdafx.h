@@ -34,7 +34,7 @@
 
 
 
-
+#define FLOAT_WINDOW_INSTANCE 1
 
 
 
