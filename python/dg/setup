@@ -1,0 +1,7 @@
+#/bin/bash
+
+[ -d build ] || mkdir build
+pushd build
+rm -rf *
+pyinstaller.exe -i ../icon2.ico ../crypt.py
+popd

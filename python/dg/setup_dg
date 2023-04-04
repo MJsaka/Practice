@@ -1,0 +1,7 @@
+#/bin/bash
+
+[ -d build_dg ] || mkdir build_dg
+pushd build_dg
+rm -rf *
+pyinstaller.exe -w -i ../icon1.ico ../dg.py
+popd

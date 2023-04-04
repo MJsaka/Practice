@@ -1,4 +1,6 @@
 ﻿Thumbs.db
+build*
+log*
 *.obj
 *.exe
 *.pdb
