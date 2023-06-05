@@ -14,31 +14,15 @@ dir_exclude_file_suffix = ['.dpj', '.pkg', '.pkgx']
 backup_root_dir = Path('d:/work/tmp/DG/Backup')
 
 
-def hiword(i):
-    return i >> 16
-
-
-def loword(i):
-    return i & 0xffff
-
-
-def byte_word(buf, i):
-    return (buf[i + 1] << 8) + buf[i]
-
-
-def byte_dword(buf, i):
+def dword_from_bytes(buf, i):
     return (buf[i + 3] << 24) + (buf[i + 2] << 16) + (buf[i + 1] << 8) + buf[i]
 
 
-def pb(b):
-    lb = len(b)
-    print(lb, b)
-    for i in range(0, lb, 4):
-        b3 = 0 if i+3 >= lb else b[i+3]
-        b2 = 0 if i+2 >= lb else b[i+2]
-        b1 = 0 if i+1 >= lb else b[i+1]
-        b0 = 0 if i+0 >= lb else b[i+0]
-        print(f'{b3:02x} {b2:02x} {b1:02x} {b0:02x}')
+def dword_to_bytes(buf, i, value):
+    buf[i+3] = (value >> 24) & 0xff
+    buf[i+2] = (value >> 16) & 0xff
+    buf[i+1] = (value >> 8) & 0xff
+    buf[i] = value & 0xff
 
 
 def write_log(log):
@@ -68,11 +52,11 @@ def isCrypted(filepath):
             fb[i] ^= 0x5c
         if fb[15] != cryptmode:
             return None
-        if byte_dword(fb, 23) != magic1:
+        if dword_from_bytes(fb, 23) != magic1:
             return None
         if fb[:15].decode('ascii') != finger:
             return None
-        if byte_dword(fb, 676) != magic2:
+        if dword_from_bytes(fb, 676) != magic2:
             return None
 
         # key
@@ -83,11 +67,8 @@ def isCrypted(filepath):
 
         # 密钥
         len1 = len(key_ba)
-        for i in range(0, 256, 4):
+        for i in range(0, 256):
             fb[i+160] ^= key_ba[i % len1]
-            fb[i+161] ^= key_ba[(i+1) % len1]
-            fb[i+162] ^= key_ba[(i+2) % len1]
-            fb[i+163] ^= key_ba[(i+3) % len1]
 
         return fb
 
@@ -113,28 +94,23 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
         # 头部 指纹1、模式
         t[0:15] = finger.encode('ascii')
         t[15] = cryptmode
-        t[23] = magic1 & 0xff
-        t[24] = (magic1 >> 8) & 0xff
-        t[25] = (magic1 >> 16) & 0xff
-        t[26] = (magic1 >> 24) & 0xff
+        dword_to_bytes(t, 23, magic1)
 
         # key
         t[32:70] = key_ba
 
-        # 密钥 0-255 随机打乱顺序
+        # 密钥 0-255
         for i in range(256):
             t[160+i] = i
 
-        for i in range(10):
+        # 随机打乱顺序
+        for i in range(0):
             j = random.randint(0, 255)
             k = random.randint(0, 255)
             t[160+j], t[160+k] = t[160+k], t[160+j]
 
-        # 指纹2
-        t[676] = magic2 & 0xff
-        t[677] = (magic2 >> 8) & 0xff
-        t[678] = (magic2 >> 16) & 0xff
-        t[679] = (magic2 >> 24) & 0xff
+        # 指纹2        
+        dword_to_bytes(t, 676, magic2)
 
         # 头部加密
         for i in range(32):
@@ -150,11 +126,8 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
 
         # 密钥加密
         len1 = len(key_ba)
-        for i in range(0, 256, 4):
+        for i in range(0, 256):
             t[i+160] ^= key_ba[i % len1]
-            t[i+161] ^= key_ba[(i+1) % len1]
-            t[i+162] ^= key_ba[(i+2) % len1]
-            t[i+163] ^= key_ba[(i+3) % len1]
 
         # key
         for i in range(32):
