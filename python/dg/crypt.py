@@ -163,13 +163,15 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
     # 备份文件
     if not bfilepath.parent.exists():
         bfilepath.parent.mkdir(parents=True)
-    Path(ofilepath).replace(bfilepath)
+    with open(ofilepath, 'rb') as of:
+        with open(bfilepath, 'wb') as bf:
+            bf.write(of.read())
 
     # 保存新文件
     if not nfilepath.parent.exists():
         nfilepath.parent.mkdir(parents=True)
-    with open(nfilepath, mode='wb') as fn:
-        fn.write(t)
+    with open(nfilepath, mode='wb') as nf:
+        nf.write(t)
 
     return True
 
@@ -197,13 +199,15 @@ def DecryptFile(ofilepath, nfilepath, bfilepath):
     # 备份文件
     if not bfilepath.parent.exists():
         bfilepath.parent.mkdir(parents=True)
-    Path(ofilepath).replace(bfilepath)
+    with open(ofilepath, 'rb') as of:
+        with open(bfilepath, 'wb') as bf:
+            bf.write(of.read())
 
     # 保存新文件
     if not nfilepath.parent.exists():
         nfilepath.parent.mkdir(parents=True)
-    with open(nfilepath, mode='wb') as fn:
-        fn.write(t)
+    with open(nfilepath, mode='wb') as nf:
+        nf.write(t)
 
     return True
 

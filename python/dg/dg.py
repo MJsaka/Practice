@@ -60,7 +60,7 @@ if True:
     win = Tk()
     win.geometry('339x230')
     win.protocol('WM_DELETE_WINDOW', hide_window)
-    win.title('文档安全管理系统')
+    win.title('天津必利优科技发展有限公司')
     win.iconbitmap('D:/work/Prog/python/alg/dg/icon1.ico')
     win.resizable = False
     win.config(bg='#f0f0f0')
@@ -71,7 +71,7 @@ if True:
     imagelogo = PhotoImage(file='D:/work/Prog/python/alg/dg/logo.png')
     labellogo = Label(win, image=imagelogo).place(x=3, y=3, width=333, height=65)
     framever = Frame(win, bg='#000000').place(x=0, y=204, width=339, height=1)
-    labelver = Label(win, text='内核版本：5.0.2.41231', background='#f0eded').place(x=3, y=205, width=333, height=22)
+    labelver = Label(win, text='内核版本：5.0.5.41627', background='#f0eded').place(x=3, y=205, width=333, height=22)
     username = StringVar(win, value='qiuxuenan')
     password = StringVar(win, value='1234567890abcdef')
     entryuser = Entry(win, textvariable=username).place(x=94, y=87, width=217, height=25)
