@@ -65,6 +65,7 @@ if True:
     win.resizable = False
     win.config(bg='#f0f0f0')
     win.attributes('-toolwindow', 1)
+    win.withdraw()
 
     labeluser = Label(win, text='账号：').place(x=40, y=91, width=49, height=14)
     labelpass = Label(win, text='密码：').place(x=40, y=131, width=49, height=14)
