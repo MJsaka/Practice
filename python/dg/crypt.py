@@ -1,6 +1,9 @@
+import os
 import sys
+import stat
 import random
 import datetime
+import traceback
 from pathlib import Path
 
 cryptmode = 3
@@ -209,6 +212,13 @@ def ModifyFile(filepath: Path, mode):
         escPath = '@' + escPath[0] + '@' + escPath[2:]
     bakpath = backup_root_dir.joinpath(escPath)
 
+    if filepath.exists():
+        os.chmod(filepath, stat.S_IREAD | stat.S_IWRITE)
+    if bakpath.exists():
+        os.chmod(bakpath, stat.S_IREAD | stat.S_IWRITE)
+    if newpath.exists():
+        os.chmod(newpath, stat.S_IREAD | stat.S_IWRITE)
+
     if mode == ord('e'):
         res = EncryptFile(filepath, filepath, bakpath)
     elif mode == ord('d'):
@@ -255,4 +265,4 @@ if __name__ == '__main__':
         elif rootPath.is_file():
             ModifyFile(rootPath, mode)
     except Exception as e:
-        write_log(e)
+        write_log(traceback.format_exc())
