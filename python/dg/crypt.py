@@ -202,32 +202,35 @@ def CheckDir(dirpath):
     return True
 
 
-def ModifyFile(filepath: Path, mode):
-    name = filepath.name[:-len(filepath.suffix)]
-    newname = name + '_' + chr(mode) + filepath.suffix
-    newpath = filepath.parent.joinpath(newname)
+def ModifyFile(filepath: Path, mode):    
+    try:
+        name = filepath.name[:-len(filepath.suffix)]
+        newname = name + '_' + chr(mode) + filepath.suffix
+        newpath = filepath.parent.joinpath(newname)
 
-    escPath = str(filepath)
-    if escPath[1] == ':':
-        escPath = '@' + escPath[0] + '@' + escPath[2:]
-    bakpath = backup_root_dir.joinpath(escPath)
+        escPath = str(filepath)
+        if escPath[1] == ':':
+            escPath = '@' + escPath[0] + '@' + escPath[2:]
+        bakpath = backup_root_dir.joinpath(escPath)
 
-    if filepath.exists():
-        os.chmod(filepath, stat.S_IREAD | stat.S_IWRITE)
-    if bakpath.exists():
-        os.chmod(bakpath, stat.S_IREAD | stat.S_IWRITE)
-    if newpath.exists():
-        os.chmod(newpath, stat.S_IREAD | stat.S_IWRITE)
+        if filepath.exists():
+            os.chmod(filepath, stat.S_IREAD | stat.S_IWRITE)
+        if bakpath.exists():
+            os.chmod(bakpath, stat.S_IREAD | stat.S_IWRITE)
+        if newpath.exists():
+            os.chmod(newpath, stat.S_IREAD | stat.S_IWRITE)
 
-    if mode == ord('e'):
-        res = EncryptFile(filepath, filepath, bakpath)
-    elif mode == ord('d'):
-        res = DecryptFile(filepath, filepath, bakpath)
+        if mode == ord('e'):
+            res = EncryptFile(filepath, filepath, bakpath)
+        elif mode == ord('d'):
+            res = DecryptFile(filepath, filepath, bakpath)
 
-    if res:
-        write_log('    ' + str(filepath))
-        write_log('--->' + str(newpath))
-        write_log('--->' + str(bakpath))
+        if res:
+            write_log('    ' + str(filepath))
+            write_log('--->' + str(newpath))
+            write_log('--->' + str(bakpath))
+    except Exception as e:
+        write_log(traceback.format_exc())
 
 
 def ModifyDir(dirpath: Path, mode):
