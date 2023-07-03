@@ -1,8 +1,11 @@
+import time
 import threading
 import pystray
 from pystray import Menu, MenuItem
 from PIL import Image
 from tkinter import Tk, Label, Button, Entry, Frame, PhotoImage, StringVar
+
+show_window_time = 0
 
 
 def quit_window(icon: pystray.Icon):
@@ -11,7 +14,12 @@ def quit_window(icon: pystray.Icon):
 
 
 def show_window():
-    win.deiconify()
+    global show_window_time
+    time_now = time.perf_counter()
+    print(f"NOW:{time_now} PRE:{show_window_time}")
+    if time_now - show_window_time < 0.2:
+        win.deiconify()
+    show_window_time = time_now
 
 
 def hide_window():
@@ -66,6 +74,7 @@ if True:
     win.config(bg='#f0f0f0')
     win.attributes('-toolwindow', 1)
     win.withdraw()
+    show_window_time = time.perf_counter()
 
     labeluser = Label(win, text='账号：').place(x=40, y=91, width=49, height=14)
     labelpass = Label(win, text='密码：').place(x=40, y=131, width=49, height=14)
