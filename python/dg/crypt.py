@@ -204,6 +204,8 @@ def CheckDir(dirpath):
 
 def ModifyFile(filepath: Path, mode):    
     try:
+        print(filepath)
+        
         name = filepath.name[:-len(filepath.suffix)]
         newname = name + '_' + chr(mode) + filepath.suffix
         newpath = filepath.parent.joinpath(newname)
