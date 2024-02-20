@@ -1,0 +1,4 @@
+xlwings
+pyside6
+pymssql
+QDarkStyle

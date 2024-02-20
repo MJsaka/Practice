@@ -1,0 +1,1 @@
+pyinstaller.exe --noconfirm --onedir --noconsole --icon icon.ico --name BomChecker --contents-directory . --add-data icons:icons main.py
