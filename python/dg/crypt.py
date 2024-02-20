@@ -128,7 +128,7 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
             t[160+i] = i
 
         # 随机打乱顺序
-        for i in range(0):
+        for i in range(1000):
             j = random.randint(0, 255)
             k = random.randint(0, 255)
             t[160+j], t[160+k] = t[160+k], t[160+j]
@@ -156,6 +156,10 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
         # key
         for i in range(32):
             t[i+716] = 0xff
+
+        # 尾部
+        for i in range(144):
+            t[i+880] = 0xff
 
     # 备份文件
     backup(ofilepath, bfilepath)
