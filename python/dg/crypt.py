@@ -43,6 +43,27 @@ def write_log(log):
         f.writelines(st + '    ' + str(log) + '\n')
 
 
+def save(nfilepath, t):
+    if not nfilepath.parent.exists():
+        nfilepath.parent.mkdir(parents=True)
+    
+    with open(nfilepath, mode='wb') as nf:
+        nf.write(t)
+
+
+def backup(ofilepath, bfilepath):
+    if not bfilepath:
+        return
+    
+    if not bfilepath.parent.exists():
+        bfilepath.parent.mkdir(parents=True)
+    
+    with open(ofilepath, 'rb') as of:
+        with open(bfilepath, 'wb') as bf:
+            bf.write(of.read())
+
+
+
 def isCrypted(filepath):
     with open(filepath, mode='rb') as f:
         fb = bytearray(f.read())
@@ -137,17 +158,10 @@ def EncryptFile(ofilepath, nfilepath, bfilepath):
             t[i+716] = 0xff
 
     # 备份文件
-    if not bfilepath.parent.exists():
-        bfilepath.parent.mkdir(parents=True)
-    with open(ofilepath, 'rb') as of:
-        with open(bfilepath, 'wb') as bf:
-            bf.write(of.read())
+    backup(ofilepath, bfilepath)
 
     # 保存新文件
-    if not nfilepath.parent.exists():
-        nfilepath.parent.mkdir(parents=True)
-    with open(nfilepath, mode='wb') as nf:
-        nf.write(t)
+    save(nfilepath, t)
 
     return True
 
@@ -173,17 +187,10 @@ def DecryptFile(ofilepath, nfilepath, bfilepath):
         t[i] = k[fb[i+1024]]
 
     # 备份文件
-    if not bfilepath.parent.exists():
-        bfilepath.parent.mkdir(parents=True)
-    with open(ofilepath, 'rb') as of:
-        with open(bfilepath, 'wb') as bf:
-            bf.write(of.read())
+    backup(ofilepath, bfilepath)
 
     # 保存新文件
-    if not nfilepath.parent.exists():
-        nfilepath.parent.mkdir(parents=True)
-    with open(nfilepath, mode='wb') as nf:
-        nf.write(t)
+    save(nfilepath, t)
 
     return True
 
